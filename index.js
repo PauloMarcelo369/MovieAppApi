@@ -9,6 +9,8 @@ app.use(cors());
 app.get("/video/:id", (req, res) => {
   const videoId = req.params.id;
 
+  console.log("nova requisição chegou");
+
   const videoPath = path.join(__dirname, "videos", `${videoId}.mp4`);
 
   if (fs.existsSync(videoPath)) {
