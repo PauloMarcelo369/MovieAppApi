@@ -27,6 +27,6 @@ app.get("/video/:id", (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("servidor rodando da porta 3000");
+app.listen(22, () => {
+  console.log("servidor rodando da porta 22");
 });
