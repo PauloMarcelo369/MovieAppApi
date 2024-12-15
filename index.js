@@ -8,22 +8,37 @@ app.use(cors());
 
 app.get("/video/:id", (req, res) => {
   const videoId = req.params.id;
-
-  console.log("nova requisição chegou");
-
   const videoPath = path.join(__dirname, "videos", `${videoId}.mp4`);
 
   if (fs.existsSync(videoPath)) {
     const stat = fs.statSync(videoPath);
-    res.writeHead(200, {
-      "content-type": "video/mp4",
-      "content-length": stat.size,
-    });
+    const fileSize = stat.size;
+    const range = req.headers.range;
 
-    const readStream = fs.createReadStream(videoPath);
-    readStream.pipe(res);
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = end - start + 1;
+      const readStream = fs.createReadStream(videoPath, { start, end });
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunkSize,
+        "Content-Type": "video/mp4",
+      });
+
+      readStream.pipe(res);
+    } else {
+      res.writeHead(200, {
+        "Content-Length": fileSize,
+        "Content-Type": "video/mp4",
+      });
+      fs.createReadStream(videoPath).pipe(res);
+    }
   } else {
-    res.status(404).send("O video não foi encontrado");
+    res.status(404).send("O vídeo não foi encontrado");
   }
 });
 
