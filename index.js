@@ -42,6 +42,17 @@ app.get("/video/:id", (req, res) => {
   }
 });
 
+app.get("/image/:id", (req, res) => {
+  const imageId = req.params.id;
+  const imagePath = path.join(__dirname, "images", `${imageId}.jpg`);
+
+  if (fs.existsSync(imagePath)) {
+    res.sendFile(imagePath);
+  } else {
+    res.status(404).send("A imagem não foi encontrada");
+  }
+});
+
 app.listen(3000, () => {
   console.log("servidor rodando da porta 3000");
 });
